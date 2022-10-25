@@ -1,0 +1,30 @@
+{
+    "VARISCITE": {
+		/* Target Device Settings */
+		"TARGET_IP":"192.168.1.72",
+
+		/* Project Settings */
+		"PROGRAM":"main",
+
+		/* Yocto SDK Configuration */
+		"ARCH":"arm-poky-linux-gnueabi",
+		"OECORE_NATIVE_SYSROOT":"/opt/poky/3.1.3/sysroots/x86_64-pokysdk-linux",
+		"SDKTARGETSYSROOT": "/opt/poky/3.1.3/sysroots/cortexa9t2hf-neon-poky-linux-gnueabi",
+
+		/* Yocto SDK Constants */
+		"CC_PREFIX": "${config:VARISCITE.OECORE_NATIVE_SYSROOT}/usr/bin/${config:VARISCITE.ARCH}/${config:VARISCITE.ARCH}-",
+		"CXX": "${config:VARISCITE.CC_PREFIX}g++ --sysroot=${config:VARISCITE.SDKTARGETSYSROOT}",
+		"CC": "${config:VARISCITE.CC_PREFIX}gcc --sysroot=${config:VARISCITE.SDKTARGETSYSROOT}",
+	},
+    "files.associations": {
+		"db_api_seller_model.h": "c",
+		"db_api_manager.h": "c",
+		"db_api_seller_repository.h": "c",
+		"api_scale_repository.h": "c",
+		"api_constants.h": "c",
+		"serial.h": "c",
+		"termios.h": "c",
+		"fcntl.h": "c",
+		"string.h": "c"
+	}
+}
