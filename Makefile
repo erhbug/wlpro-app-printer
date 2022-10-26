@@ -15,7 +15,11 @@ SB_LIB = -L$(SB_ROOT)/usr/lib
 CXXFLAGS += -DGRE_TARGET_OS_linux -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard
 SB_LIB += -lpthread -lsqlite3
 
+#Source code
+SOURCE_C = *.c
+SOURCE_C += ../wlpro-app-message-queue/*.c
+
 all: main.c
-	$(CC) $(CXXFLAGS) $(SB_INC) -Og -g -Wall main.c serial.c app_input.c -o main $(SB_LIB)
+	$(CC) $(CXXFLAGS) $(SB_INC) -Og -g -Wall $(SOURCE_C) -o printer $(SB_LIB)
 clean:
-	rm -f main 
+	rm -f printer 
