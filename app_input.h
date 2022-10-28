@@ -27,8 +27,10 @@ int  iInputSerialPort;
 
 typedef struct strsensor{
    char flgTemp;//Bandera que indica si la temp esta ok(0) alta temperatura(1)
-	char flgPaper;//Bander que indica el estado del papel; 0 Sin papel,  1 RESPALDO,         2 ETIQUETA	
-    char flgCabezal;//B3    Cabezal;       0 Cerrado,    1 abierto.		
+	 char flgPaper;//Bander que indica el estado del papel; 0 Sin papel,  1 RESPALDO,         2 ETIQUETA	
+   char flgDoor;//B3    Cabezal;       0 Cerrado,    1 abierto.		
+   char status;
+
 	
 	float TemperatureLevelAlarm;//nivel al que se dispara la alarma de temperatura, recomendado 65°C
 	int  nivelRespaldo;//180   1
@@ -41,6 +43,7 @@ extern strsensor sensor;
 
 typedef struct strreportemcu{
    char cresumen;	
+   char crc;
   float fPosicionE1;//posicion de la etiqueta 1
   float fPosicionE2;//posicion de la etiqueta 1
 }strreportemcu;
@@ -50,7 +53,7 @@ extern strreportemcu reportemcu;
 
 
 int iAppReadSensors(void);
-void vAppPrintLine(unsigned char *ptr, int lenght);
+char vAppPrintLine(unsigned char *ptr, int lenght);
 int iAppPrintFlag(void);
 void vAppFeedmm(int mm);
 

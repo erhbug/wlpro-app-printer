@@ -16,9 +16,6 @@
 #include <termios.h> 
 #include <pthread.h>
 #include "app_input.h"
-//#include "../debug.h"
-//#include "../globals.h"
-//#include "../app.h"
 #include "./serial.h"
 
 /*******************************************************************************
@@ -31,8 +28,7 @@ strsensor sensor;
 vAppOutLabel
 ------------------------------------------------------------------------------*/
 void vAppOutLabel(void){
-  char txt[]="#CMD03"; 
-  
+  char txt[]="#CMD03";   
   if(iInputSerialPort==0)vAppInputsOpen();
   pthread_mutex_lock(&Mutex_Inputs);
   SerialFlush(iInputSerialPort,TCIOFLUSH);
@@ -95,7 +91,7 @@ for(int x=0;x<10;x++)
 /*------------------------------------------------------------------------------
 vAppPrintLine
 ------------------------------------------------------------------------------*/
-void vAppPrintLine(unsigned char *ptr, int lenght){
+char vAppPrintLine0(unsigned char *ptr, int lenght){
   if(iInputSerialPort==0)vAppInputsOpen();
   pthread_mutex_lock(&Mutex_Inputs);
   //sprintf(cmd,"Bp");
@@ -106,14 +102,32 @@ void vAppPrintLine(unsigned char *ptr, int lenght){
     SerialWrite(iInputSerialPort,ptr++,1);
     //usleep(1);
   }
-
-
-
-
-  
   pthread_mutex_unlock(&Mutex_Inputs);
+  return 0;
 }
 
+char vAppPrintLine(unsigned char *ptr, int lenght){
+  char crc=0;
+  if(iInputSerialPort==0)vAppInputsOpen();
+  pthread_mutex_lock(&Mutex_Inputs);
+  SerialFlush(iInputSerialPort,TCIOFLUSH);  
+
+  for(char x=0;x<lenght;x++){
+     if(x<lenght-1){
+      crc ^=  *ptr;
+      SerialWrite(iInputSerialPort,ptr++,1);
+     }
+     else{
+      crc=~crc;
+      *ptr=crc;
+      SerialWrite(iInputSerialPort,ptr,1);
+     }
+  }
+  
+
+  pthread_mutex_unlock(&Mutex_Inputs);
+  return *ptr;
+}
 /*------------------------------------------------------------------------------
 iAppInputFlgPrinted
 ------------------------------------------------------------------------------*/
@@ -155,7 +169,7 @@ void vAppInputsOpen(void){
   if(iInputSerialPort!=0)return;
   iInputSerialPort = SerialOpen(INPUT_PORT, O_RDWR | O_NOCTTY);
   if (iInputSerialPort < 0) printf( "%s open\n",INPUT_PORT);
-  SerialSetting(iInputSerialPort,B1152000,0);//B921600
+  SerialSetting(iInputSerialPort,B1152000,0);//B921600//B1152000
   pthread_mutex_init(&Mutex_Inputs,NULL);
   usleep(10000);
 }

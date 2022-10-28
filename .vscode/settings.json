@@ -4,7 +4,7 @@
 		"TARGET_IP":"192.168.1.72",
 
 		/* Project Settings */
-		"PROGRAM":"main",
+		"PROGRAM":"printer",
 
 		/* Yocto SDK Configuration */
 		"ARCH":"arm-poky-linux-gnueabi",

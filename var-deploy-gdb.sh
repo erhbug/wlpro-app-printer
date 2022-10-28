@@ -1,7 +1,7 @@
 #!/bin/bash
 readonly TARGET_IP="$1"
 readonly PROGRAM="$2"
-readonly TARGET_DIR="/usr/src"
+readonly TARGET_DIR="/home/user/backend"
 
 # Must match startsPattern in tasks.json
 echo "Deploying to target"
@@ -10,7 +10,7 @@ echo "Deploying to target"
 ssh root@${TARGET_IP} "sh -c '/usr/bin/killall -q gdbserver; rm -rf ${TARGET_DIR}/${PROGRAM}  exit 0'"
 
 # send the program to the target
-scp ${PROGRAM} root@${TARGET_IP}:${TARGET_DIR}
+scp ${PROGRAM} Ticket root@${TARGET_IP}:${TARGET_DIR}
 
 # Must match endsPattern in tasks.json
 echo "Starting GDB Server on Target"

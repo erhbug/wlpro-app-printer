@@ -37,41 +37,38 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 #include "./app_input.h"
+#define PRINT 10
 unsigned char Printbuffer[128];
 
 char countSend=0;
 int main(void)
 {
+	char CMD=PRINT;
+	char crc;
 	int x=0;
+	int sizeofpacket;
 	FILE *fp;
 	puts("Firmware Version D21PRINTR1904"); /* prints Hello World */
-
-	fp = fopen("/usr/src/Ticket","r");
+	fp = fopen("./Ticket","r");
 	puts("start\r\n"); /* prints Hello World */	   
- //vAppSetLabelToPrint();
-    int sizeofpacket =14;
-			  fread(Printbuffer,sizeof(char),sizeofpacket,fp);               
-					 vAppPrintLine(Printbuffer,sizeofpacket);
-	     	      x+=sizeofpacket;
-				  
-				  SerialRead(iInputSerialPort,(char *)&reportemcu,sizeof(strreportemcu));
-                  //printf("0cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
- sizeofpacket=57;
-		for(int a=0;a<800;a++){
+	
+	sizeofpacket =14;
+	fread(Printbuffer,sizeof(char),sizeofpacket,fp);               
+	vAppPrintLine(Printbuffer,sizeofpacket);			  
+	SerialRead(iInputSerialPort,(char *)&reportemcu,2);
+
+	sizeofpacket=57;
+	for(int a=0;a<800;a++){
 		fread(Printbuffer,sizeof(char),sizeofpacket,fp);      
-		vAppPrintLine(Printbuffer,sizeofpacket);
-	    x+=sizeofpacket;
-		SerialRead(iInputSerialPort,(char *)&reportemcu,1);
-		//printf("0cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
-		} 
- //vAppOutLabel();
- //sleep(3);
- fclose(fp);
- puts("End print"); 	    
- /* while(1){
-	iAppReadSensors();
-	printf("cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
-	usleep(100000);
-  }  */  
-  return 0;
+		Printbuffer[56]=23;
+		crc=vAppPrintLine(Printbuffer,sizeofpacket);
+		SerialRead(iInputSerialPort,(char *)&reportemcu,2);
+		if(crc!=reportemcu.crc)
+			printf("line=%d, crc_pc=%d, crc_mcu=%d\n",a,(int)crc,(int)reportemcu.crc);
+	} 
+	fclose(fp);
+	puts("End print"); 	  
+	CMD=0; 
+
+  	return 0;
 }
