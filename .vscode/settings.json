@@ -25,6 +25,8 @@
 		"serial.h": "c",
 		"termios.h": "c",
 		"fcntl.h": "c",
-		"string.h": "c"
+		"string.h": "c",
+		"pthread.h": "c",
+		"mq_manager.h": "c"
 	}
 }

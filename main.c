@@ -40,10 +40,9 @@
 #include <pthread.h>
 #include "./app_input.h"
 #include "../wlpro-app-message-queue/mq_manager.h"
-#define PRINT 10
+bool MsgPrintStart=0;
 
-unsigned char Printbuffer[128];
-char countSend=0;
+
 
 void complete(MQ_Message message) 
 {
@@ -57,6 +56,7 @@ void complete(MQ_Message message)
 			printf("--------------------------------------------------------------------\n");
 			sprintf(payload, "Payload -> %s\n", message.payload);
 			printf(payload);
+			MsgPrintStart=1;
 			printf("--------------------------------------------------------------------\n");
 
 		break;
@@ -71,7 +71,7 @@ void complete(MQ_Message message)
 			sprintf(payload, "1,1,1,1");
 			strcpy(message.payload, payload);
 
-			MQ_sendMessage(message, MQ_PATH_NAME_2, MQ_PROJECT_PRINTER);
+			MQ_sendMessage(message, MQ_KEY_PRINTER );
 
 			printf("--------------------------------------------------------------------\n");
 			printf("All sensors status sent.\n");
@@ -97,7 +97,7 @@ void *print()
 {
      while (true) 
      {
-        MQ_reciveMessage((long) MQ_TYPE_PRINT, MQ_PATH_NAME_1, MQ_PROJECT_OPERATION, complete);
+        MQ_reciveMessage((long) MQ_TYPE_PRINT, MQ_KEY_OPERATION, complete);
      }
 }
 
@@ -105,7 +105,7 @@ void *readSensors()
 {
      while (true) 
      {
-        MQ_reciveMessage((long) MQ_TYPE_READ_SENSORS, MQ_PATH_NAME_1, MQ_PROJECT_OPERATION, complete);
+        MQ_reciveMessage((long) MQ_TYPE_READ_SENSORS, MQ_KEY_OPERATION, complete);
      }
 }
 
@@ -113,7 +113,19 @@ void *printerApplication()
 {
      while (true) 
      {
-        
+		if(MsgPrintStart==1){
+	 		MsgPrintStart=0;
+			imprimir();	
+		}
+     }
+}
+
+void *Feed()
+{
+
+     while (true) 
+     {
+		MQ_reciveMessage((long) MQ_TYPE_FEED, MQ_KEY_OPERATION, complete);              
      }
 }
 
@@ -122,47 +134,19 @@ int main(void)
 	pthread_t threadToPrint;
 	pthread_t threadToReadSensors;
 	pthread_t threadToPrinterApplication;
-	char CMD=PRINT;
-	char crc;
-	int x=0;
-	int sizeofpacket;
-	FILE *fp;
+	pthread_t threadToFeed;
+
 	puts("Firmware Version D21PRINTR1904"); /* prints Hello World */
 
-fp = fopen("./Ticket","r");
-	puts("start\r\n"); /* prints Hello World */	   
-	
-	sizeofpacket =14;
-	fread(Printbuffer,sizeof(char),sizeofpacket,fp);               
-	vAppPrintLine(Printbuffer,sizeofpacket);			  
-	SerialRead(iInputSerialPort,(char *)&reportemcu,2);
-
-	sizeofpacket=57;
-	for(int a=0;a<800;a++){
-		fread(Printbuffer,sizeof(char),sizeofpacket,fp);      
-		Printbuffer[56]=23;
-		crc=vAppPrintLine(Printbuffer,sizeofpacket);
-		SerialRead(iInputSerialPort,(char *)&reportemcu,2);
-		if(crc!=reportemcu.crc)
-			printf("line=%d, crc_pc=%d, crc_mcu=%d\n",a,(int)crc,(int)reportemcu.crc);
-	} 
-	fclose(fp);
-	puts("End print"); 	  
-	CMD=0; 
-
+	pthread_create( &threadToPrinterApplication, NULL, printerApplication, NULL);
 	pthread_create( &threadToPrint, NULL, print, NULL);
 	pthread_create( &threadToReadSensors, NULL, readSensors, NULL);
-	pthread_create( &threadToPrinterApplication, NULL, printerApplication, NULL);
-
+	pthread_create( &threadToFeed, NULL, Feed, NULL);
+	
+	pthread_join( threadToPrinterApplication, NULL);
   	pthread_join( threadToPrint, NULL);
 	pthread_join( threadToReadSensors, NULL);
-	pthread_join( threadToPrinterApplication, NULL);
+	pthread_join( threadToFeed, NULL);
 
- 	puts("End print"); 	    
-	/* while(1){
-		iAppReadSensors();
-		printf("cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
-		usleep(100000);
-	}  */  
   	return 0;
 }
