@@ -40,6 +40,7 @@
 #include <pthread.h>
 #include "./app_input.h"
 #include "../wlpro-app-message-queue/mq_manager.h"
+#define PRINT 10
 
 unsigned char Printbuffer[128];
 char countSend=0;
@@ -121,32 +122,33 @@ int main(void)
 	pthread_t threadToPrint;
 	pthread_t threadToReadSensors;
 	pthread_t threadToPrinterApplication;
+	char CMD=PRINT;
+	char crc;
 	int x=0;
+	int sizeofpacket;
 	FILE *fp;
 	puts("Firmware Version D21PRINTR1904"); /* prints Hello World */
 
-	fp = fopen("./Ticket","r");
+fp = fopen("./Ticket","r");
 	puts("start\r\n"); /* prints Hello World */	   
- 	//vAppSetLabelToPrint();
-    int sizeofpacket =14;
+	
+	sizeofpacket =14;
 	fread(Printbuffer,sizeof(char),sizeofpacket,fp);               
-	vAppPrintLine(Printbuffer,sizeofpacket);
-	x+=sizeofpacket;
-				  
-	//SerialRead(iInputSerialPort,(char *)&reportemcu,sizeof(strreportemcu));
-    //printf("0cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
- 	sizeofpacket=57;
+	vAppPrintLine(Printbuffer,sizeofpacket);			  
+	SerialRead(iInputSerialPort,(char *)&reportemcu,2);
 
+	sizeofpacket=57;
 	for(int a=0;a<800;a++){
 		fread(Printbuffer,sizeof(char),sizeofpacket,fp);      
-		vAppPrintLine(Printbuffer,sizeofpacket);
-		x+=sizeofpacket;
-		//SerialRead(iInputSerialPort,(char *)&reportemcu,1);
-		//printf("0cresumen=%d,fPosicionE1=%f,fPosicionE2=%f\n",reportemcu.cresumen,reportemcu.fPosicionE1, reportemcu.fPosicionE2);
+		Printbuffer[56]=23;
+		crc=vAppPrintLine(Printbuffer,sizeofpacket);
+		SerialRead(iInputSerialPort,(char *)&reportemcu,2);
+		if(crc!=reportemcu.crc)
+			printf("line=%d, crc_pc=%d, crc_mcu=%d\n",a,(int)crc,(int)reportemcu.crc);
 	} 
- 	//vAppOutLabel();
- 	//sleep(3);
- 	fclose(fp);
+	fclose(fp);
+	puts("End print"); 	  
+	CMD=0; 
 
 	pthread_create( &threadToPrint, NULL, print, NULL);
 	pthread_create( &threadToReadSensors, NULL, readSensors, NULL);
