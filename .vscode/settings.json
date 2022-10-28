@@ -1,7 +1,7 @@
 {
     "VARISCITE": {
 		/* Target Device Settings */
-		"TARGET_IP":"192.168.1.82",
+		"TARGET_IP":"192.168.1.72",
 
 		/* Project Settings */
 		"PROGRAM":"printer",
