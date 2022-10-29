@@ -46,6 +46,9 @@ char imprimir(void){
 		Printbuffer[56]=23;
 		crcSoM=vAppPrintLine(Printbuffer,sizeofpacket);
 		receiveSensorsValuesFromMCU();
+		//if(printer.cCMD == CMD_NULL)
+		//	return EXIT_FAILURE;
+
 		if(crcSoM!=reportemcu.crc)
 			printf("line=%d, crc_pc=%d, crc_mcu=%d\n",a,(int)crcSoM,(int)reportemcu.crc);
 	} 
