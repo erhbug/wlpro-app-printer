@@ -122,7 +122,6 @@ void *printerApplication()
 
 void *Feed()
 {
-
      while (true) 
      {
 		MQ_reciveMessage((long) MQ_TYPE_FEED, MQ_KEY_OPERATION, complete);              

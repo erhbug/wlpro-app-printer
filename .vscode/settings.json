@@ -27,6 +27,7 @@
 		"fcntl.h": "c",
 		"string.h": "c",
 		"pthread.h": "c",
-		"mq_manager.h": "c"
+		"mq_manager.h": "c",
+		"printer.h": "c"
 	}
 }
